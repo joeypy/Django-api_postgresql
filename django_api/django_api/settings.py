@@ -51,10 +51,10 @@ INSTALLED_APPS = [
     # External Libraries
     "rest_framework",
     "corsheaders",  # Django cors headers
-    "rest_framework_swagger",  # Django REST Swagger
     'drf_yasg',
     # Apps Django
     "countries.apps.CountriesConfig",
+    "authentication.apps.AuthenticationConfig"
 ]
 
 MIDDLEWARE = [
@@ -154,5 +154,8 @@ STATIC_URL = "/static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'authentication.backends.JWTAuthentication',
+    ),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
