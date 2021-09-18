@@ -3,5 +3,10 @@ from .models import Country
 
 
 class CountrySerializer(serializers.ModelSerializer):
-    model = Country
-    fields  = ('id', 'name', 'capital', )
+    class Meta:
+        model = Country
+        fields = [
+            "id",
+            "name",
+            "capital"
+        ]

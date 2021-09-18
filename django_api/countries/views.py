@@ -9,58 +9,65 @@ from .models import Country
 from .serializers import CountrySerializer
 
 
-@api_view(['GET', 'POST'])
+@api_view(["GET", "POST"])
 def countries_list(request):
     # GET METHOD
-    if request.method == 'GET':
+    if request.method == "GET":
         countries = Country.objects.all()
 
-        name = request.GET.get('name', None)
+        name = request.GET.get("name", None)
         if name is not None:
             countries = countries.filter(name__icontains=name)
 
         countries_serializer = CountrySerializer(countries, many=True)
+        print(countries_serializer.data)
         return JsonResponse(countries_serializer.data, safe=False)
         # 'safe-False' for objects serialization
 
     # POST METHOD
-    elif request.method == 'POST':
+    elif request.method == "POST":
         countries_data = JSONParser().parse(request)
         countries_serializer = CountrySerializer(data=countries_data)
         if countries_serializer.is_valid():
             countries_serializer.save()
-            return JsonResponse(countries_serializer.data, status=status.HTTP_201_CREATED)
-        return JsonResponse(countries_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(
+                countries_serializer.data, status=status.HTTP_201_CREATED
+            )
+        return JsonResponse(
+            countries_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(["GET", "PUT", "DELETE"])
 def countries_detail(request, pk):
     try:
         country = Country.objects.get(pk=pk)
     except ObjectDoesNotExist:
         return JsonResponse(
-            {'status': False, 'message': 'The country does not exist'},
-            status=status.HTTP_404_NOT_FOUND
+            {"status": False, "message": "The country does not exist"},
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     # GET METHOD
-    if request.method == 'GET':
+    if request.method == "GET":
         country_serializer = CountrySerializer(country)
         return JsonResponse(country_serializer.data)
 
     # PUT METHOD
-    elif request.method == 'PUT':
+    elif request.method == "PUT":
         country_data = JSONParser().parse(request)
         country_serializer = CountrySerializer(country, data=country_data)
         if country_serializer.is_valid():
             country_serializer.save()
             return JsonResponse(country_serializer.data, status=status.HTTP_201_CREATED)
-        return JsonResponse(country_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(
+            country_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+        )
 
     # DELETE METHOD
-    elif request.method == 'DELETE':
+    elif request.method == "DELETE":
         country.delete()
         return JsonResponse(
-            {'status': True, 'message': 'Country was deleted successfully'},
-            status=status.HTTP_204_NO_CONTENT
+            {"status": True, "message": "Country was deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT,
         )

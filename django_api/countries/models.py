@@ -2,10 +2,13 @@ from django.db import models
 
 
 class Country(models.Model):
-    name = models.CharField(max_length=50, blank=False, default='')
-    capital = models.CharField(max_length=50, blank=False, default='')
+    name = models.CharField(max_length=50, blank=False, default="")
+    capital = models.CharField(max_length=50, blank=False, default="")
+
+    def __str__(self):
+        return self.name
 
     class Meta:
-        ordering = ('id',)
-        verbose_name = 'country'
-        verbose_name_plural = 'countries'
+        ordering = ("id",)
+        verbose_name = "country"
+        verbose_name_plural = "countries"
