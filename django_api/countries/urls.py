@@ -1,7 +1,10 @@
-from django.urls import path, re_path
+from django.urls import path
+from rest_framework.urlpatterns import format_suffix_patterns
+
 from . import views
 
 urlpatterns = [
-    path('api/countries', views.countries_list),
-    re_path(r'^api/countries/(?P<pk>[0-9]+)$', views.countries_detail),
+    path('api/countries', views.CountriesList.as_view()),
+    path('api/countries/<int:pk>', views.CountryDetail.as_view()),
 ]
+

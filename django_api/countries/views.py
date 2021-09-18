@@ -1,73 +1,88 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from .models import Country
 from .serializers import CountrySerializer
 
 
-@api_view(["GET", "POST"])
-def countries_list(request):
-    # GET METHOD
-    if request.method == "GET":
+class CountriesList(APIView):
+    """
+        List all countries, or create a new country.
+    """
+    def get(self, request, format=None):
         countries = Country.objects.all()
-
-        name = request.GET.get("name", None)
-        if name is not None:
-            countries = countries.filter(name__icontains=name)
-
         countries_serializer = CountrySerializer(countries, many=True)
-        print(countries_serializer.data)
-        return JsonResponse(countries_serializer.data, safe=False)
-        # 'safe-False' for objects serialization
+        return Response(countries_serializer.data)
 
-    # POST METHOD
-    elif request.method == "POST":
-        countries_data = JSONParser().parse(request)
-        countries_serializer = CountrySerializer(data=countries_data)
-        if countries_serializer.is_valid():
-            countries_serializer.save()
-            return JsonResponse(
-                countries_serializer.data, status=status.HTTP_201_CREATED
-            )
-        return JsonResponse(
-            countries_serializer.errors, status=status.HTTP_400_BAD_REQUEST
-        )
-
-
-@api_view(["GET", "PUT", "DELETE"])
-def countries_detail(request, pk):
-    try:
-        country = Country.objects.get(pk=pk)
-    except ObjectDoesNotExist:
-        return JsonResponse(
-            {"status": False, "message": "The country does not exist"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
-
-    # GET METHOD
-    if request.method == "GET":
-        country_serializer = CountrySerializer(country)
-        return JsonResponse(country_serializer.data)
-
-    # PUT METHOD
-    elif request.method == "PUT":
-        country_data = JSONParser().parse(request)
-        country_serializer = CountrySerializer(country, data=country_data)
+    def post(self, request, format=None):
+        country_serializer = CountrySerializer(data=request.data)
         if country_serializer.is_valid():
             country_serializer.save()
-            return JsonResponse(country_serializer.data, status=status.HTTP_201_CREATED)
-        return JsonResponse(
-            country_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            return Response(
+                {'status': True, 'data': country_serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            {
+                'status': False,
+                'message': 'resource created successfully.',
+                'data': country_serializer.data
+             },
+            status=status.HTTP_400_BAD_REQUEST
         )
 
-    # DELETE METHOD
-    elif request.method == "DELETE":
-        country.delete()
-        return JsonResponse(
-            {"status": True, "message": "Country was deleted successfully"},
-            status=status.HTTP_204_NO_CONTENT,
+
+class CountryDetail(APIView):
+    """
+    Retrieve, update or delete a country instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Country.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        country = self.get_object(pk)
+        country_serializer = CountrySerializer(country)
+        return Response(
+                {
+                    'status': True,
+                    'data': country_serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
+
+    def put(self, request, pk, format=None):
+        country = self.get_object(pk)
+        country_serializer = CountrySerializer(country, data=request.data)
+        if country_serializer.is_valid():
+            country_serializer.save()
+            return Response(
+                {
+                    'status': True,
+                    'message': 'resource updated successfully.',
+                    'data': country_serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            {
+                'status': False,
+                'message': 'can\'t updated the resource.',
+                'error': country_serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
         )
+
+    def delete(self, request, pk, format=None):
+        country = self.get_object(pk)
+        country.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
