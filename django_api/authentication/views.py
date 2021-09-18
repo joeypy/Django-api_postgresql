@@ -7,17 +7,17 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 
-from .serializers import UserSerializer
+from .serializers import RegisterSerializer, LoginSerializer
 
 env = environ.Env()
 
 
 class RegisterView(GenericAPIView):
-    serializer_class = UserSerializer
+    serializer_class = RegisterSerializer
 
     def post(self, request):
         """ Register a user in the api. """
-        serializer = UserSerializer(data=request.data)
+        serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({
@@ -33,6 +33,8 @@ class RegisterView(GenericAPIView):
 
 
 class LoginView(GenericAPIView):
+    serializer_class = LoginSerializer
+
     def post(self, request):
         data = request.data
         username = data.get('username', '')
@@ -41,7 +43,7 @@ class LoginView(GenericAPIView):
 
         if user:
             auth_token = jwt.encode({'username': user.username}, env('JWT_SECRET_KEY'))
-            serializer = UserSerializer(user)
+            serializer = RegisterSerializer(user)
             data = {'user': serializer.data, 'token': auth_token}
             return Response({
                 'status': True,
