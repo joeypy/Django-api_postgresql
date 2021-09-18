@@ -15,12 +15,15 @@ class CountriesList(APIView):
     """
         List all countries, or create a new country.
     """
+
     def get(self, request, format=None):
+        """ List all countries. """
         countries = Country.objects.all()
         countries_serializer = CountrySerializer(countries, many=True)
         return Response(countries_serializer.data)
 
     def post(self, request, format=None):
+        """ Create a new country. """
         country_serializer = CountrySerializer(data=request.data)
         if country_serializer.is_valid():
             country_serializer.save()
@@ -49,6 +52,7 @@ class CountryDetail(APIView):
             raise Http404
 
     def get(self, request, pk, format=None):
+        """ Retrieve a country instance. """
         country = self.get_object(pk)
         country_serializer = CountrySerializer(country)
         return Response(
@@ -60,6 +64,7 @@ class CountryDetail(APIView):
             )
 
     def put(self, request, pk, format=None):
+        """ Update a country instance. """
         country = self.get_object(pk)
         country_serializer = CountrySerializer(country, data=request.data)
         if country_serializer.is_valid():
@@ -82,6 +87,7 @@ class CountryDetail(APIView):
         )
 
     def delete(self, request, pk, format=None):
+        """ Delete a country instance. """
         country = self.get_object(pk)
         country.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

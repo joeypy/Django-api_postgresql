@@ -11,6 +11,7 @@ django-rest-swagger = "*"
 django-cors-headers = "*"
 psycopg2 = "*"
 black = "*"
+drf-yasg = "*"
 
 [dev-packages]
 
