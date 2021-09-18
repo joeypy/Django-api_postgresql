@@ -53,8 +53,12 @@ INSTALLED_APPS = [
     "corsheaders",  # Django cors headers
     'drf_yasg',
     # Apps Django
+    "authentication.apps.AuthenticationConfig",
+    "contacts.apps.ContactsConfig",
     "countries.apps.CountriesConfig",
-    "authentication.apps.AuthenticationConfig"
+
+
+
 ]
 
 MIDDLEWARE = [
